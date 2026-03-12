@@ -1,15 +1,33 @@
-This is a tool to help designers build color palettes with
-combinations that conform with accessibility standards.
+# Accessible Color Matrix
 
-It is based on work done in [18F/brand#94][].
+A modernized accessible color palette builder for exploring text/background
+contrast combinations.
 
-## Quick start
+This project started from the original
+[`toolness/accessible-color-matrix`](https://github.com/toolness/accessible-color-matrix)
+tool and has been modernized to a React, TypeScript, Vite, and Tailwind stack.
 
-```
+## Stack
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS 4
+
+The original Elm source is still in the repo as reference, but the active app
+now lives in the React code under `src/`.
+
+## Development
+
+```bash
 npm install
 npm start
 ```
 
-Then visit http://localhost:3000/.
+Then open [http://localhost:3000](http://localhost:3000).
 
-[18F/brand#94]: https://github.com/18F/brand/pull/94
+## Production build
+
+```bash
+npm run build
+```
