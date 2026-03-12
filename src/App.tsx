@@ -18,7 +18,10 @@ import {
   nextPaletteEntryId,
 } from "./lib/palette";
 import { normalizeEditableHex, toCssHex } from "./lib/color";
-import { parsePaletteFromSearch, stringifyPalette } from "./lib/queryString";
+import {
+  parsePersistedStateFromSearch,
+  stringifyPersistedState,
+} from "./lib/queryString";
 import type {
   AppState,
   ApcaTypographySettings,
@@ -39,7 +42,8 @@ type Action =
   | { type: "startEditing" };
 
 function createInitialState(): AppState {
-  const palette = getPaletteOrDefault(parsePaletteFromSearch());
+  const { palette: serializedPalette } = parsePersistedStateFromSearch();
+  const palette = getPaletteOrDefault(serializedPalette);
 
   return {
     palette,
@@ -158,10 +162,12 @@ function entryFallbackColor(palette: PaletteEntry[], id: number) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
-  const [contrastStandardId, setContrastStandardId] =
-    useState<ContrastStandardId>("wcag-aa");
-  const [apcaTypography, setApcaTypography] =
-    useState<ApcaTypographySettings>(DEFAULT_APCA_TYPOGRAPHY);
+  const [contrastStandardId, setContrastStandardId] = useState<ContrastStandardId>(
+    () => parsePersistedStateFromSearch().contrastStandardId,
+  );
+  const [apcaTypography, setApcaTypography] = useState<ApcaTypographySettings>(
+    () => parsePersistedStateFromSearch().apcaTypography,
+  );
   const canSave = isPaletteValid(state.palette);
   const contrastStandard = getContrastStandard(contrastStandardId);
 
@@ -175,8 +181,23 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const queryString = stringifyPersistedState({
+      apcaTypography,
+      contrastStandardId,
+      palette: state.lastSavedPalette,
+    });
+    const nextUrl = queryString ? `?${queryString}` : window.location.pathname;
+
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [apcaTypography, contrastStandardId, state.lastSavedPalette]);
+
   const handlePopState = useEffectEvent(() => {
-    dispatch({ type: "loadPalette", palette: parsePaletteFromSearch() });
+    const persistedState = parsePersistedStateFromSearch();
+
+    dispatch({ type: "loadPalette", palette: persistedState.palette });
+    setContrastStandardId(persistedState.contrastStandardId);
+    setApcaTypography(persistedState.apcaTypography);
   });
 
   useEffect(() => {
@@ -204,7 +225,11 @@ export default function App() {
       return;
     }
 
-    const queryString = stringifyPalette(state.palette);
+    const queryString = stringifyPersistedState({
+      apcaTypography,
+      contrastStandardId,
+      palette: state.palette,
+    });
     const nextUrl = queryString ? `?${queryString}` : window.location.pathname;
     window.history.pushState({}, "", nextUrl);
     dispatch({ type: "finishEditing" });

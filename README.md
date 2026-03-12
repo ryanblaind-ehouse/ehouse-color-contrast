@@ -22,6 +22,9 @@ tool and has been modernized to a React, TypeScript, Vite, and Tailwind stack.
 - WCAG large text
 - APCA with configurable text size and font weight, evaluated with the official APCA lookup table
 
+Palette choices, the selected contrast mode, and APCA typography settings are
+all persisted in the URL so results are easy to share.
+
 ## Development
 
 ```bash
