@@ -81,3 +81,36 @@ button.palette-action-remove {
   padding: 1rem;
   line-height: 0.75;
 }
+
+.contrast-standard-controls {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.contrast-standard-label {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.contrast-standard-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.contrast-standard-button-row button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.contrast-standard-description {
+  font-size: 0.9em;
+  margin-top: 0.75rem;
+  max-width: 46rem;
+}
+
+.contrast-score-label {
+  display: block;
+  font-size: 0.75em;
+  line-height: 1.4;
+}

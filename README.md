@@ -13,9 +13,14 @@ tool and has been modernized to a React, TypeScript, Vite, and Tailwind stack.
 - TypeScript
 - Vite
 - Tailwind CSS 4
+- `apca-w3` for APCA contrast scoring
 
-The original Elm source is still in the repo as reference, but the active app
-now lives in the React code under `src/`.
+## Included checks
+
+- WCAG AA
+- WCAG AAA
+- WCAG large text
+- APCA body text (evaluated with the official APCA lookup for 16px, 400-weight text)
 
 ## Development
 

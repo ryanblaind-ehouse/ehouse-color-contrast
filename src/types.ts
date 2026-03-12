@@ -1,5 +1,11 @@
 export type SerializedPalette = Array<[string, string]>;
 
+export type ContrastStandardId =
+  | "wcag-aa"
+  | "wcag-aaa"
+  | "wcag-large"
+  | "apca-body";
+
 export type PaletteEntry = {
   id: number;
   name: string;

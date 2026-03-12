@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ryanblaind-ehouse/ehouse-color-contrast#readme",
   "dependencies": {
+    "apca-w3": "^0.1.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

@@ -1,7 +1,11 @@
-import { useEffect, useEffectEvent, useReducer } from "react";
+import { useEffect, useEffectEvent, useReducer, useState } from "react";
 
 import { ContrastMatrix } from "./components/ContrastMatrix";
 import { PaletteEditor } from "./components/PaletteEditor";
+import {
+  contrastStandards,
+  getContrastStandard,
+} from "./lib/contrastStandards";
 import { updateFavicon } from "./lib/favicon";
 import {
   getPaletteOrDefault,
@@ -10,7 +14,12 @@ import {
 } from "./lib/palette";
 import { normalizeEditableHex, toCssHex } from "./lib/color";
 import { parsePaletteFromSearch, stringifyPalette } from "./lib/queryString";
-import type { AppState, PaletteEntry, SerializedPalette } from "./types";
+import type {
+  AppState,
+  ContrastStandardId,
+  PaletteEntry,
+  SerializedPalette,
+} from "./types";
 
 type Action =
   | { type: "add" }
@@ -143,7 +152,10 @@ function entryFallbackColor(palette: PaletteEntry[], id: number) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const [contrastStandardId, setContrastStandardId] =
+    useState<ContrastStandardId>("wcag-aa");
   const canSave = isPaletteValid(state.palette);
+  const contrastStandard = getContrastStandard(contrastStandardId);
 
   useEffect(() => {
     updateFavicon(state.lastSavedPalette.map((entry) => entry.color));
@@ -235,7 +247,35 @@ export default function App() {
         </div>
 
         <h2>Accessible color combinations</h2>
-        <ContrastMatrix palette={state.palette} />
+        <div className="usa-grid-full usa-color-row contrast-standard-controls">
+          <p className="contrast-standard-label">Contrast standard</p>
+          <div
+            aria-label="Contrast standard"
+            className="contrast-standard-button-row"
+            role="toolbar"
+          >
+            {contrastStandards.map((standard) => (
+              <button
+                aria-pressed={contrastStandardId === standard.id}
+                className={
+                  contrastStandardId === standard.id ? undefined : "usa-button-outline"
+                }
+                key={standard.id}
+                onClick={() => setContrastStandardId(standard.id)}
+                type="button"
+              >
+                {standard.buttonLabel}
+              </button>
+            ))}
+          </div>
+          <p className="contrast-standard-description">
+            <strong>{contrastStandard.label}.</strong> {contrastStandard.description}
+          </p>
+        </div>
+        <ContrastMatrix
+          palette={state.palette}
+          standardId={contrastStandardId}
+        />
       </main>
 
       <footer role="contentinfo">

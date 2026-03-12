@@ -1,10 +1,13 @@
 import type { CSSProperties } from "react";
-import type { PaletteEntry } from "../types";
+
 import {
-  areColorsIndistinguishable,
-  contrastRatio,
-  formatContrastRatio,
-} from "../lib/color";
+  assessContrast,
+  buildFailingText,
+  buildPassingText,
+  getLegendText,
+} from "../lib/contrastStandards";
+import { areColorsIndistinguishable } from "../lib/color";
+import type { ContrastStandardId, PaletteEntry } from "../types";
 
 const WHITE = "#FFFFFF";
 
@@ -14,22 +17,6 @@ function capitalize(value: string) {
   }
 
   return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function badContrastText(
-  background: PaletteEntry,
-  foreground: PaletteEntry,
-  ratio: number,
-) {
-  return `Do not use ${foreground.name} text on ${background.name} background; it is not 508-compliant, with a contrast ratio of ${formatContrastRatio(ratio)}.`;
-}
-
-function goodContrastText(
-  background: PaletteEntry,
-  foreground: PaletteEntry,
-  ratio: number,
-) {
-  return `The contrast ratio of ${foreground.name} on ${background.name} is ${formatContrastRatio(ratio)}.`;
 }
 
 function Symbols() {
@@ -53,21 +40,20 @@ function Symbols() {
 function BadContrastSvg({ className = "" }: { className?: string }) {
   return (
     <svg className={className}>
-      <use href="#usa-matrix-bad-contrast-ratio" xlinkHref="#usa-matrix-bad-contrast-ratio" />
+      <use
+        href="#usa-matrix-bad-contrast-ratio"
+        xlinkHref="#usa-matrix-bad-contrast-ratio"
+      />
     </svg>
   );
 }
 
-function Legend() {
+function Legend({ standardId }: { standardId: ContrastStandardId }) {
   return (
     <div className="usa-matrix-legend">
       <BadContrastSvg />
       <p className="usa-sr-invisible" aria-hidden="true">
-        Please don't use these color combinations; they do not meet a color
-        contrast ratio of 4.5:1, so they do not conform with the standards of
-        Section 508 for body text. This means that some people would have
-        difficulty reading the text. Employing accessibility best practices
-        improves the user experience for all users.
+        {getLegendText(standardId)}
       </p>
     </div>
   );
@@ -135,20 +121,31 @@ function MatrixRowHeader({ entry }: { entry: PaletteEntry }) {
 function MatrixCell({
   background,
   foreground,
+  standardId,
 }: {
   background: PaletteEntry;
   foreground: PaletteEntry;
+  standardId: ContrastStandardId;
 }) {
-  const ratio = contrastRatio(background.color, foreground.color);
+  const assessment = assessContrast(
+    standardId,
+    foreground.color,
+    background.color,
+  );
 
-  if (ratio >= 4.5) {
+  if (assessment.pass) {
     return (
       <td className="usa-matrix-valid-color-combo">
         <div
           className="usa-matrix-square"
           role="presentation"
           style={backgroundStyle(background)}
-          title={goodContrastText(background, foreground, ratio)}
+          title={buildPassingText(
+            standardId,
+            background.name,
+            foreground.name,
+            assessment,
+          )}
         >
           <strong
             aria-hidden="true"
@@ -161,32 +158,47 @@ function MatrixCell({
         <div className="usa-matrix-color-combo-description">
           <strong>{capitalize(foreground.name)}</strong> text on{" "}
           <strong>{capitalize(background.name)}</strong> background
+          <small className="contrast-score-label">{assessment.scoreText}</small>
           <span className="usa-sr-only">
             {" "}
-            is 508-compliant, with a contrast ratio of {formatContrastRatio(ratio)}.
+            passes because it reaches {assessment.scoreText}.{" "}
+            {assessment.requirementText}.
           </span>
         </div>
       </td>
     );
   }
 
-  const description = badContrastText(background, foreground, ratio);
+  const description = buildFailingText(
+    standardId,
+    background.name,
+    foreground.name,
+    assessment,
+  );
 
   return (
     <td className="usa-matrix-invalid-color-combo">
       <div role="presentation" title={description}>
         <BadContrastSvg className="usa-matrix-square" />
       </div>
-      <div className="usa-sr-only">{description}</div>
+      <div className="usa-sr-only">
+        {description} {assessment.requirementText}.
+      </div>
     </td>
   );
 }
 
-export function ContrastMatrix({ palette }: { palette: PaletteEntry[] }) {
+export function ContrastMatrix({
+  palette,
+  standardId,
+}: {
+  palette: PaletteEntry[];
+  standardId: ContrastStandardId;
+}) {
   return (
     <div>
       <Symbols />
-      <Legend />
+      <Legend standardId={standardId} />
       <table className="usa-table-borderless usa-matrix">
         <thead>
           <tr>
@@ -205,6 +217,7 @@ export function ContrastMatrix({ palette }: { palette: PaletteEntry[] }) {
                   background={background}
                   foreground={foreground}
                   key={`${background.id}-${foreground.id}`}
+                  standardId={standardId}
                 />
               ))}
             </tr>
