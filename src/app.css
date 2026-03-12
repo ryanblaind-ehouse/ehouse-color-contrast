@@ -114,3 +114,30 @@ button.palette-action-remove {
   font-size: 0.75em;
   line-height: 1.4;
 }
+
+.apca-typography-controls {
+  margin-top: 1rem;
+  max-width: 46rem;
+}
+
+.apca-typography-field {
+  display: inline-block;
+  margin-right: 1rem;
+  vertical-align: top;
+}
+
+.apca-typography-field label {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.apca-typography-field input,
+.apca-typography-field select {
+  margin-top: 0;
+  max-width: 10rem;
+}
+
+.apca-typography-summary {
+  font-size: 0.9em;
+  margin-top: 0.75rem;
+}

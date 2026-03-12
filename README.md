@@ -20,7 +20,7 @@ tool and has been modernized to a React, TypeScript, Vite, and Tailwind stack.
 - WCAG AA
 - WCAG AAA
 - WCAG large text
-- APCA body text (evaluated with the official APCA lookup for 16px, 400-weight text)
+- APCA with configurable text size and font weight, evaluated with the official APCA lookup table
 
 ## Development
 

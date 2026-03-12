@@ -1,28 +1,31 @@
 import { calcAPCA, fontLookupAPCA } from "apca-w3";
 
 import { contrastRatio, formatContrastRatio } from "./color";
-import type { ContrastStandardId } from "../types";
+import type {
+  ApcaTypographySettings,
+  ContrastStandardId,
+  FontWeightOption,
+} from "../types";
 
-type ContrastStandard =
-  | {
-      id: "wcag-aa" | "wcag-aaa" | "wcag-large";
-      label: string;
-      buttonLabel: string;
-      description: string;
-      method: "wcag";
-      threshold: number;
-      requirementLabel: string;
-    }
-  | {
-      id: "apca-body";
-      label: string;
-      buttonLabel: string;
-      description: string;
-      method: "apca";
-      fontSizePx: number;
-      fontWeight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
-      requirementLabel: string;
-    };
+type WcagContrastStandard = {
+  id: "wcag-aa" | "wcag-aaa" | "wcag-large";
+  label: string;
+  buttonLabel: string;
+  description: string;
+  method: "wcag";
+  threshold: number;
+  requirementLabel: string;
+};
+
+type ApcaContrastStandard = {
+  id: "apca-body";
+  label: string;
+  buttonLabel: string;
+  description: string;
+  method: "apca";
+};
+
+type ContrastStandard = WcagContrastStandard | ApcaContrastStandard;
 
 export type ContrastAssessment = {
   pass: boolean;
@@ -30,6 +33,15 @@ export type ContrastAssessment = {
   scoreText: string;
   requirementText: string;
 };
+
+export const DEFAULT_APCA_TYPOGRAPHY: ApcaTypographySettings = {
+  fontSizePx: 16,
+  fontWeight: 400,
+};
+
+export const APCA_FONT_WEIGHT_OPTIONS: FontWeightOption[] = [
+  100, 200, 300, 400, 500, 600, 700, 800, 900,
+];
 
 const FONT_WEIGHT_COLUMN = {
   100: 1,
@@ -73,14 +85,11 @@ export const contrastStandards: ContrastStandard[] = [
   },
   {
     id: "apca-body",
-    label: "APCA Body Text",
+    label: "APCA",
     buttonLabel: "APCA",
     description:
-      "Uses the official APCA lookup table for 16px, 400-weight body text.",
+      "Uses the official APCA lookup table for the selected text size and weight.",
     method: "apca",
-    fontSizePx: 16,
-    fontWeight: 400,
-    requirementLabel: "APCA body-text target for 16px regular text",
   },
 ];
 
@@ -94,7 +103,7 @@ function formatApcaScore(score: number) {
 
 function getMinimumReadableSize(
   score: number,
-  fontWeight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900,
+  fontWeight: FontWeightOption,
 ) {
   const lookup = fontLookupAPCA(Math.abs(score));
   const value = lookup[FONT_WEIGHT_COLUMN[fontWeight]];
@@ -102,10 +111,31 @@ function getMinimumReadableSize(
   return typeof value === "number" ? value : null;
 }
 
+function formatApcaRequirement(settings: ApcaTypographySettings) {
+  return `Requires at least Lc support for ${settings.fontSizePx}px at weight ${settings.fontWeight}`;
+}
+
+export function getApcaTypographySummary(settings: ApcaTypographySettings) {
+  return `${settings.fontSizePx}px text at ${settings.fontWeight} weight`;
+}
+
+export function clampApcaFontSize(fontSizePx: number) {
+  return Math.max(8, Math.min(120, Math.round(fontSizePx || DEFAULT_APCA_TYPOGRAPHY.fontSizePx)));
+}
+
+export function parseApcaFontWeight(value: string): FontWeightOption {
+  const parsed = Number.parseInt(value, 10) as FontWeightOption;
+
+  return APCA_FONT_WEIGHT_OPTIONS.includes(parsed)
+    ? parsed
+    : DEFAULT_APCA_TYPOGRAPHY.fontWeight;
+}
+
 export function assessContrast(
   standardId: ContrastStandardId,
   textColor: string,
   backgroundColor: string,
+  apcaTypography: ApcaTypographySettings = DEFAULT_APCA_TYPOGRAPHY,
 ) {
   const standard = getContrastStandard(standardId);
 
@@ -121,14 +151,14 @@ export function assessContrast(
   }
 
   const lcScore = calcAPCA(textColor, backgroundColor);
-  const minimumSize = getMinimumReadableSize(lcScore, standard.fontWeight);
-  const pass = minimumSize !== null && minimumSize <= standard.fontSizePx;
+  const minimumSize = getMinimumReadableSize(lcScore, apcaTypography.fontWeight);
+  const pass = minimumSize !== null && minimumSize <= apcaTypography.fontSizePx;
 
   return {
     pass,
     score: lcScore,
     scoreText: formatApcaScore(lcScore),
-    requirementText: standard.requirementLabel,
+    requirementText: formatApcaRequirement(apcaTypography),
   } satisfies ContrastAssessment;
 }
 
@@ -154,12 +184,15 @@ export function buildFailingText(
   return `Do not use ${foregroundName} text on ${backgroundName} background for ${standard.label}; it scores ${assessment.scoreText}.`;
 }
 
-export function getLegendText(standardId: ContrastStandardId) {
+export function getLegendText(
+  standardId: ContrastStandardId,
+  apcaTypography: ApcaTypographySettings = DEFAULT_APCA_TYPOGRAPHY,
+) {
   const standard = getContrastStandard(standardId);
 
   if (standard.method === "wcag") {
     return `Please don't use these color combinations; they do not meet ${standard.label} for body text. ${standard.requirementLabel}.`;
   }
 
-  return "Please don't use these color combinations for APCA body text; they do not meet the official APCA lookup guidance for 16px, 400-weight text.";
+  return `Please don't use these color combinations for APCA when evaluating ${getApcaTypographySummary(apcaTypography)}; they do not meet the official APCA lookup guidance for that typography.`;
 }

@@ -3,8 +3,13 @@ import { useEffect, useEffectEvent, useReducer, useState } from "react";
 import { ContrastMatrix } from "./components/ContrastMatrix";
 import { PaletteEditor } from "./components/PaletteEditor";
 import {
+  APCA_FONT_WEIGHT_OPTIONS,
+  DEFAULT_APCA_TYPOGRAPHY,
+  clampApcaFontSize,
   contrastStandards,
   getContrastStandard,
+  getApcaTypographySummary,
+  parseApcaFontWeight,
 } from "./lib/contrastStandards";
 import { updateFavicon } from "./lib/favicon";
 import {
@@ -16,6 +21,7 @@ import { normalizeEditableHex, toCssHex } from "./lib/color";
 import { parsePaletteFromSearch, stringifyPalette } from "./lib/queryString";
 import type {
   AppState,
+  ApcaTypographySettings,
   ContrastStandardId,
   PaletteEntry,
   SerializedPalette,
@@ -154,6 +160,8 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
   const [contrastStandardId, setContrastStandardId] =
     useState<ContrastStandardId>("wcag-aa");
+  const [apcaTypography, setApcaTypography] =
+    useState<ApcaTypographySettings>(DEFAULT_APCA_TYPOGRAPHY);
   const canSave = isPaletteValid(state.palette);
   const contrastStandard = getContrastStandard(contrastStandardId);
 
@@ -271,8 +279,53 @@ export default function App() {
           <p className="contrast-standard-description">
             <strong>{contrastStandard.label}.</strong> {contrastStandard.description}
           </p>
+          {contrastStandardId === "apca-body" ? (
+            <div className="apca-typography-controls">
+              <div className="apca-typography-field">
+                <label htmlFor="apca-font-size">Font size (px)</label>
+                <input
+                  id="apca-font-size"
+                  inputMode="numeric"
+                  min={8}
+                  onChange={(event) =>
+                    setApcaTypography((current) => ({
+                      ...current,
+                      fontSizePx: clampApcaFontSize(
+                        Number.parseInt(event.target.value, 10),
+                      ),
+                    }))
+                  }
+                  type="number"
+                  value={apcaTypography.fontSizePx}
+                />
+              </div>
+              <div className="apca-typography-field">
+                <label htmlFor="apca-font-weight">Font weight</label>
+                <select
+                  id="apca-font-weight"
+                  onChange={(event) =>
+                    setApcaTypography((current) => ({
+                      ...current,
+                      fontWeight: parseApcaFontWeight(event.target.value),
+                    }))
+                  }
+                  value={apcaTypography.fontWeight}
+                >
+                  {APCA_FONT_WEIGHT_OPTIONS.map((weight) => (
+                    <option key={weight} value={weight}>
+                      {weight}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="apca-typography-summary">
+                Evaluating APCA against <strong>{getApcaTypographySummary(apcaTypography)}</strong>.
+              </p>
+            </div>
+          ) : null}
         </div>
         <ContrastMatrix
+          apcaTypography={apcaTypography}
           palette={state.palette}
           standardId={contrastStandardId}
         />

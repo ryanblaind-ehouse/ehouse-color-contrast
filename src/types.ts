@@ -6,6 +6,22 @@ export type ContrastStandardId =
   | "wcag-large"
   | "apca-body";
 
+export type FontWeightOption =
+  | 100
+  | 200
+  | 300
+  | 400
+  | 500
+  | 600
+  | 700
+  | 800
+  | 900;
+
+export type ApcaTypographySettings = {
+  fontSizePx: number;
+  fontWeight: FontWeightOption;
+};
+
 export type PaletteEntry = {
   id: number;
   name: string;

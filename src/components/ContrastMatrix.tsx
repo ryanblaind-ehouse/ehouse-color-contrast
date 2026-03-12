@@ -7,7 +7,11 @@ import {
   getLegendText,
 } from "../lib/contrastStandards";
 import { areColorsIndistinguishable } from "../lib/color";
-import type { ContrastStandardId, PaletteEntry } from "../types";
+import type {
+  ApcaTypographySettings,
+  ContrastStandardId,
+  PaletteEntry,
+} from "../types";
 
 const WHITE = "#FFFFFF";
 
@@ -48,12 +52,18 @@ function BadContrastSvg({ className = "" }: { className?: string }) {
   );
 }
 
-function Legend({ standardId }: { standardId: ContrastStandardId }) {
+function Legend({
+  standardId,
+  apcaTypography,
+}: {
+  standardId: ContrastStandardId;
+  apcaTypography: ApcaTypographySettings;
+}) {
   return (
     <div className="usa-matrix-legend">
       <BadContrastSvg />
       <p className="usa-sr-invisible" aria-hidden="true">
-        {getLegendText(standardId)}
+        {getLegendText(standardId, apcaTypography)}
       </p>
     </div>
   );
@@ -122,15 +132,18 @@ function MatrixCell({
   background,
   foreground,
   standardId,
+  apcaTypography,
 }: {
   background: PaletteEntry;
   foreground: PaletteEntry;
   standardId: ContrastStandardId;
+  apcaTypography: ApcaTypographySettings;
 }) {
   const assessment = assessContrast(
     standardId,
     foreground.color,
     background.color,
+    apcaTypography,
   );
 
   if (assessment.pass) {
@@ -189,16 +202,18 @@ function MatrixCell({
 }
 
 export function ContrastMatrix({
+  apcaTypography,
   palette,
   standardId,
 }: {
+  apcaTypography: ApcaTypographySettings;
   palette: PaletteEntry[];
   standardId: ContrastStandardId;
 }) {
   return (
     <div>
       <Symbols />
-      <Legend standardId={standardId} />
+      <Legend apcaTypography={apcaTypography} standardId={standardId} />
       <table className="usa-table-borderless usa-matrix">
         <thead>
           <tr>
@@ -214,6 +229,7 @@ export function ContrastMatrix({
               <MatrixRowHeader entry={background} />
               {palette.map((foreground) => (
                 <MatrixCell
+                  apcaTypography={apcaTypography}
                   background={background}
                   foreground={foreground}
                   key={`${background.id}-${foreground.id}`}
