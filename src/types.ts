@@ -34,3 +34,25 @@ export type AppState = {
   isEditing: boolean;
   lastSavedPalette: PaletteEntry[];
 };
+
+export type PaletteImportSourceKind = "upload" | "url" | "clipboard";
+
+export type PaletteImportTargetCount = 4 | 6 | 8 | 10;
+
+export type PaletteImportStatus = "idle" | "loading" | "ready" | "error";
+
+export type PaletteImportPreviewState = {
+  sourceKind: PaletteImportSourceKind | null;
+  sourceLabel: string;
+  previewUrl: string | null;
+  status: PaletteImportStatus;
+  targetCount: PaletteImportTargetCount;
+  palette: PaletteEntry[];
+  errorMessage: string | null;
+};
+
+export type MatrixSvgArtifact = {
+  markup: string;
+  width: number;
+  height: number;
+};

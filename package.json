@@ -6,7 +6,15 @@
     "dev": "vite --host 0.0.0.0 --port 3000",
     "start": "vite --host 0.0.0.0 --port 3000",
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 4173"
+    "test": "vitest run",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "ui": "shadcn",
+    "ui:add": "shadcn add",
+    "ui:view": "shadcn view",
+    "ui:search": "shadcn search @shadcn",
+    "ui:info": "shadcn info",
+    "ui:docs": "shadcn docs",
+    "ui:mcp:init": "shadcn mcp init"
   },
   "repository": {
     "type": "git",
@@ -19,25 +27,28 @@
   },
   "homepage": "https://github.com/ryanblaind-ehouse/ehouse-color-contrast#readme",
   "dependencies": {
-    "@fontsource-variable/geist": "^5.2.8",
     "apca-w3": "^0.1.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "extract-colors": "^4.2.1",
     "lucide-react": "^0.577.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "shadcn": "^4.0.5",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.2.0",
+    "shadcn": "^4.0.5",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^4.1.0"
   }
 }

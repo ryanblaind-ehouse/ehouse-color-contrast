@@ -1,8 +1,6 @@
 @import "tailwindcss";
-@import "../static/main.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -11,153 +9,27 @@
     color-scheme: light;
   }
 
+  html {
+    font-size: 16px;
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+  }
+
   body {
-    padding: 0 1em;
-    @apply bg-background text-foreground;
+    min-height: 100vh;
+    @apply bg-muted/30 text-foreground antialiased;
   }
 
-  @media screen and (min-width: 600px) {
-    body {
-      padding: 0 2em;
-    }
-  }
-
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
   * {
     @apply border-border outline-ring/50;
   }
-  html {
-    @apply font-sans;
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
-}
-
-.usa-color-square,
-.usa-matrix-square {
-  transition: background-color 0.25s;
-}
-
-.usa-primary-color-section.palette-is-editable {
-  margin-bottom: 0;
-}
-
-.usa-primary-color-section.palette-is-editable .usa-color-square {
-  margin-bottom: 12rem;
-}
-
-ul.usa-primary-color-section {
-  display: block;
-}
-
-ul.usa-primary-color-section li::before {
-  content: normal;
-}
-
-button.palette-action-remove.palette-entry-is-light {
-  color: #323a45;
-  box-shadow: inset 0 0 0 2px #323a45;
-}
-
-button.palette-action-remove.palette-entry-is-light:focus {
-  box-shadow: inset 0 0 0 2px #aeb0b5;
-}
-
-button.palette-action-remove.palette-entry-is-light:hover {
-  color: #aeb0b5;
-  box-shadow: inset 0 0 0 2px #aeb0b5;
-}
-
-button.palette-action-remove,
-.palette-action-add-wrapper button {
-  position: absolute;
-  width: auto;
-}
-
-button.palette-action-remove {
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.5rem;
-  margin: 0;
-  line-height: 0.75;
-}
-
-.palette-action-add-wrapper {
-  box-shadow: inset 0 0 0 1px #f0f0f0;
-}
-
-.palette-action-add-wrapper button {
-  top: calc(50% - 2.5rem);
-  left: calc(50% - 1.5rem);
-  padding: 1rem;
-  line-height: 0.75;
-}
-
-.contrast-standard-controls {
-  margin-top: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.contrast-standard-label {
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.contrast-standard-button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.contrast-standard-button-row button {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.contrast-standard-description {
-  font-size: 0.9em;
-  margin-top: 0.75rem;
-  max-width: 46rem;
-}
-
-.contrast-score-label {
-  display: block;
-  font-size: 0.75em;
-  line-height: 1.4;
-}
-
-.apca-typography-controls {
-  margin-top: 1rem;
-  max-width: 46rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 1rem;
-}
-
-.apca-typography-field {
-  flex: 0 0 10rem;
-}
-
-.apca-typography-field label {
-  display: block;
-  margin-top: 0;
-  margin-bottom: 0.25rem;
-}
-
-.apca-typography-field input,
-.apca-typography-field select {
-  margin-top: 0;
-  max-width: none;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.apca-typography-summary {
-  font-size: 0.9em;
-  margin-top: 0;
-  flex-basis: 100%;
 }
 
 :root {
@@ -176,6 +48,7 @@ button.palette-action-remove {
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -211,6 +84,7 @@ button.palette-action-remove {
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -230,38 +104,39 @@ button.palette-action-remove {
 }
 
 @theme inline {
-  --font-sans: 'Geist Variable', sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
+  --font-sans: "Inter Variable", "Inter", sans-serif;
   --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
