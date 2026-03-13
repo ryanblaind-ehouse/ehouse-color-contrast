@@ -77,7 +77,7 @@ export function PaletteEditor({
             key={entry.id}
             style={squareStyle(entry)}
           >
-            {isEditing && palette.length > 1 ? (
+            {palette.length > 1 ? (
               <button
                 aria-label={labelText}
                 className={[
@@ -138,13 +138,13 @@ export function PaletteEditor({
         );
       })}
 
-      {isEditing && palette.length < MAX_PALETTE_ENTRIES ? (
+      {palette.length < MAX_PALETTE_ENTRIES ? (
         <li className="usa-color-square palette-action-add-wrapper">
           <button
-            aria-label="Add a new color"
+            aria-label="Add a new color to the matrix"
             className="usa-button-outline"
             onClick={onAdd}
-            title="Add a new color"
+            title="Add a new color to the matrix"
             type="button"
           >
             +

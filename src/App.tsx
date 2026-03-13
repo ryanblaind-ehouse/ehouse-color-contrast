@@ -99,25 +99,32 @@ function reducer(state: AppState, action: Action): AppState {
     }
 
     case "remove":
-      return {
-        ...state,
-        palette: state.palette.filter((entry) => entry.id !== action.id),
-      };
+      {
+        const palette = state.palette.filter((entry) => entry.id !== action.id);
+
+        return {
+          ...state,
+          palette,
+          lastSavedPalette: state.isEditing ? state.lastSavedPalette : palette,
+        };
+      }
 
     case "add": {
       const nextId = nextPaletteEntryId(state.palette);
+      const palette = [
+        ...state.palette,
+        {
+          id: nextId,
+          name: `Color ${nextId + 1}`,
+          color: "#FF0000",
+          editableColor: "FF0000",
+        },
+      ];
 
       return {
         ...state,
-        palette: [
-          ...state.palette,
-          {
-            id: nextId,
-            name: `Color ${nextId + 1}`,
-            color: "#FF0000",
-            editableColor: "FF0000",
-          },
-        ],
+        palette,
+        lastSavedPalette: state.isEditing ? state.lastSavedPalette : palette,
       };
     }
 

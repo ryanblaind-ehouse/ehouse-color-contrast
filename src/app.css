@@ -118,15 +118,18 @@ button.palette-action-remove {
 .apca-typography-controls {
   margin-top: 1rem;
   max-width: 46rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
 }
 
 .apca-typography-field {
-  display: inline-block;
-  margin-right: 1rem;
-  vertical-align: top;
+  flex: 0 0 10rem;
 }
 
 .apca-typography-field label {
+  display: block;
   margin-top: 0;
   margin-bottom: 0.25rem;
 }
@@ -134,10 +137,13 @@ button.palette-action-remove {
 .apca-typography-field input,
 .apca-typography-field select {
   margin-top: 0;
-  max-width: 10rem;
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .apca-typography-summary {
   font-size: 0.9em;
-  margin-top: 0.75rem;
+  margin-top: 0;
+  flex-basis: 100%;
 }
