@@ -39,27 +39,3 @@ Then open [http://localhost:3000](http://localhost:3000).
 ```bash
 npm run build
 ```
-
-## Shadcn Tooling
-
-This project is configured for the current `shadcn` CLI and includes the
-project-level shadcn skill for Codex.
-
-Common commands:
-
-- `npm run ui -- add button`
-- `npm run ui:add -- card`
-- `npm run ui:view -- button`
-- `npm run ui:search -- button`
-- `npm run ui:info -- --json`
-- `npm run ui:docs -- button`
-- `npm run ui:mcp:init -- --client codex`
-
-Project files:
-
-- [`components.json`](/Users/ryanblaind/Sites/color-contrast/components.json)
-- [`skills-lock.json`](/Users/ryanblaind/Sites/color-contrast/skills-lock.json)
-- [`SKILL.md`](/Users/ryanblaind/Sites/color-contrast/.agents/skills/shadcn/SKILL.md)
-
-The Codex MCP server is configured in `~/.codex/config.toml`. Codex needs a
-restart before the new `shadcn` MCP server is available.

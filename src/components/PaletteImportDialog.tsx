@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   TriangleAlert,
   Upload,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -108,6 +109,19 @@ function getStatusText(status: PaletteImportPreviewState["status"]) {
   }
 }
 
+function getSourceKindLabel(sourceKind: PaletteImportPreviewState["sourceKind"]) {
+  switch (sourceKind) {
+    case "upload":
+      return "Uploaded image";
+    case "url":
+      return "Image URL";
+    case "clipboard":
+      return "Clipboard image";
+    default:
+      return null;
+  }
+}
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -157,6 +171,20 @@ export function PaletteImportDialog({
     }));
     setActiveTab("upload");
     setUrlValue("");
+  });
+
+  const clearPreview = useEffectEvent(() => {
+    requestIdRef.current += 1;
+    clearSource();
+    setPreview((current) => ({
+      ...current,
+      sourceKind: null,
+      sourceLabel: "",
+      previewUrl: null,
+      status: "idle",
+      palette: [],
+      errorMessage: null,
+    }));
   });
 
   const runExtraction = useEffectEvent(async (source: PreparedPaletteImportSource) => {
@@ -326,6 +354,8 @@ export function PaletteImportDialog({
     handleDialogChange(false);
   };
 
+  const sourceKindLabel = getSourceKindLabel(preview.sourceKind);
+
   return (
     <>
       <Button
@@ -362,6 +392,10 @@ export function PaletteImportDialog({
                   <FieldGroup>
                     <FieldSet>
                       <FieldLegend variant="label">Color count</FieldLegend>
+                      <FieldDescription>
+                        Changing the count re-extracts the palette from the current
+                        image.
+                      </FieldDescription>
                       <ToggleGroup
                         className="w-full flex-wrap"
                         onValueChange={(value) => {
@@ -443,6 +477,12 @@ export function PaletteImportDialog({
                           <Input
                             id="palette-url"
                             onChange={(event) => setUrlValue(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" && urlValue.trim()) {
+                                event.preventDefault();
+                                void loadSource(createImageSourceFromUrl(urlValue));
+                              }
+                            }}
                             placeholder="https://example.com/palette-image.png"
                             spellCheck={false}
                             type="url"
@@ -515,7 +555,18 @@ export function PaletteImportDialog({
                       current matrix palette.
                     </CardDescription>
                   </div>
-                  <CardAction>
+                  <CardAction className="flex flex-wrap gap-2">
+                    {preview.previewUrl || preview.errorMessage ? (
+                      <Button
+                        onClick={() => clearPreview()}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <X data-icon="inline-start" />
+                        Clear
+                      </Button>
+                    ) : null}
                     <Badge variant={getStatusBadgeVariant(preview.status)}>
                       {getStatusText(preview.status)}
                     </Badge>
@@ -523,12 +574,23 @@ export function PaletteImportDialog({
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   {preview.previewUrl ? (
-                    <div className="overflow-hidden rounded-xl border bg-muted/30">
+                    <div className="relative overflow-hidden rounded-xl border bg-muted/30">
                       <img
                         alt={`Import source preview from ${preview.sourceLabel || "image"}`}
                         className="aspect-[16/9] w-full object-cover"
                         src={preview.previewUrl}
                       />
+                      {preview.status === "loading" ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/85 backdrop-blur-[1px]">
+                          <LoaderCircle className="animate-spin text-muted-foreground" />
+                          <p className="text-sm font-medium text-foreground">
+                            Extracting {preview.targetCount} colors
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Rebuilding the preview from the current image.
+                          </p>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <Alert>
@@ -543,6 +605,9 @@ export function PaletteImportDialog({
 
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">{preview.targetCount} target colors</Badge>
+                    {sourceKindLabel ? (
+                      <Badge variant="outline">{sourceKindLabel}</Badge>
+                    ) : null}
                     {preview.sourceLabel ? (
                       <Badge variant="outline">{preview.sourceLabel}</Badge>
                     ) : null}
@@ -561,9 +626,19 @@ export function PaletteImportDialog({
                     </Alert>
                   ) : null}
 
+                  {preview.previewUrl ? (
+                    <Alert>
+                      <TriangleAlert />
+                      <AlertTitle>Replace-only import</AlertTitle>
+                      <AlertDescription>
+                        Applying the preview replaces the current palette in the
+                        matrix and updates the shareable URL.
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+
                   {preview.palette.length > 0 ? (
                     <PaletteEditor
-                      isEditing
                       onAdd={() => {}}
                       onChangeColorText={(id, value) =>
                         setPreview((current) => ({
@@ -607,6 +682,13 @@ export function PaletteImportDialog({
           </div>
 
           <DialogFooter>
+            <Button
+              onClick={() => handleDialogChange(false)}
+              type="button"
+              variant="outline"
+            >
+              Cancel
+            </Button>
             <Button
               disabled={preview.status !== "ready" || preview.palette.length === 0}
               onClick={applyPalette}

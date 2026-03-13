@@ -7,14 +7,7 @@
     "start": "vite --host 0.0.0.0 --port 3000",
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "test": "vitest run",
-    "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "ui": "shadcn",
-    "ui:add": "shadcn add",
-    "ui:view": "shadcn view",
-    "ui:search": "shadcn search @shadcn",
-    "ui:info": "shadcn info",
-    "ui:docs": "shadcn docs",
-    "ui:mcp:init": "shadcn mcp init"
+    "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "repository": {
     "type": "git",
@@ -45,7 +38,6 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.2.0",
-    "shadcn": "^4.0.5",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",

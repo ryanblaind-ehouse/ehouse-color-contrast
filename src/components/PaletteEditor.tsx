@@ -1,7 +1,11 @@
-import { useState, type ChangeEvent, type CSSProperties, type DragEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+  type DragEvent,
+} from "react";
 import { GripVertical, Plus, X } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,7 +20,7 @@ import { areColorsIndistinguishable } from "@/lib/color";
 import type { PaletteEntry } from "@/types";
 
 type PaletteEditorProps = {
-  isEditing: boolean;
+  compact?: boolean;
   palette: PaletteEntry[];
   onAdd: () => void;
   onChangeColorText: (id: number, value: string) => void;
@@ -49,11 +53,17 @@ function handleColorChange(
   onChangeColorText(id, event.target.value);
 }
 
-function Swatch({ entry }: { entry: PaletteEntry }) {
+function Swatch({
+  compact = false,
+  entry,
+}: {
+  compact?: boolean;
+  entry: PaletteEntry;
+}) {
   return (
     <div
       className={cn(
-        "h-24 rounded-lg border border-border/70",
+        compact ? "h-18 rounded-lg border border-border/70" : "h-24 rounded-lg border border-border/70",
         areColorsIndistinguishable(entry.color, WHITE) ? "bg-card" : "bg-transparent",
       )}
       style={squareStyle(entry)}
@@ -62,7 +72,7 @@ function Swatch({ entry }: { entry: PaletteEntry }) {
 }
 
 export function PaletteEditor({
-  isEditing,
+  compact = false,
   palette,
   onAdd,
   onChangeColorText,
@@ -128,10 +138,13 @@ export function PaletteEditor({
             size="sm"
           >
             <div className="relative px-3 pt-3">
-              <Swatch entry={entry} />
+              <Swatch compact={compact} entry={entry} />
               <div
                 aria-label={`Drag to reorder ${entry.name}`}
-                className="absolute top-4 left-4 flex size-7 cursor-grab items-center justify-center rounded-md border bg-background/90 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
+                className={cn(
+                  "absolute left-4 flex size-7 cursor-grab items-center justify-center rounded-md border bg-background/90 text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing",
+                  compact ? "top-3.5" : "top-4",
+                )}
                 draggable
                 onDragStart={(event) => handleDragStart(event, entry.id)}
                 role="button"
@@ -143,7 +156,7 @@ export function PaletteEditor({
               {palette.length > 1 ? (
                 <Button
                   aria-label={labelText}
-                  className="absolute top-4 right-4"
+                  className={cn("absolute right-4", compact ? "top-3.5" : "top-4")}
                   onClick={() => onRemove(entry.id)}
                   size="icon-xs"
                   title={labelText}
@@ -154,21 +167,30 @@ export function PaletteEditor({
                 </Button>
               ) : null}
             </div>
-            <CardContent className="flex flex-col gap-3 pt-0">
-              {isEditing ? (
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor={nameId}>Color name</FieldLabel>
+            <CardContent className={cn("flex flex-col pt-0", compact ? "gap-2" : "gap-3")}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel className="sr-only" htmlFor={nameId}>
+                    Color name
+                  </FieldLabel>
+                  <Input
+                    id={nameId}
+                    onChange={(event) => onChangeName(entry.id, event.target.value)}
+                    placeholder="Color name"
+                    type="text"
+                    value={entry.name}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel className="sr-only" htmlFor={valueId}>
+                    Hex value
+                  </FieldLabel>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-sm text-muted-foreground">
+                      #
+                    </span>
                     <Input
-                      id={nameId}
-                      onChange={(event) => onChangeName(entry.id, event.target.value)}
-                      type="text"
-                      value={entry.name}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor={valueId}>Hex value</FieldLabel>
-                    <Input
+                      className="pl-6 font-mono uppercase"
                       id={valueId}
                       onChange={(event) =>
                         handleColorChange(event, entry.id, onChangeColorText)
@@ -178,22 +200,14 @@ export function PaletteEditor({
                       type="text"
                       value={entry.editableColor}
                     />
+                  </div>
+                  {compact ? null : (
                     <FieldDescription>
                       Enter a 3 or 6 digit hex value without the leading #.
                     </FieldDescription>
-                  </Field>
-                </FieldGroup>
-              ) : (
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {entry.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{entry.color}</p>
-                  </div>
-                  <Badge variant="outline">{entry.color.slice(1).toUpperCase()}</Badge>
-                </div>
-              )}
+                  )}
+                </Field>
+              </FieldGroup>
             </CardContent>
           </Card>
         );
@@ -202,7 +216,10 @@ export function PaletteEditor({
       {showAddCard ? (
         <Card className="border-dashed" size="sm">
           <button
-            className="flex min-h-44 w-full flex-col items-center justify-center gap-4 rounded-lg px-6 py-8 text-center"
+            className={cn(
+              "flex w-full flex-col items-center justify-center rounded-lg px-6 text-center",
+              compact ? "min-h-32 gap-3 py-6" : "min-h-44 gap-4 py-8",
+            )}
             onClick={onAdd}
             type="button"
           >

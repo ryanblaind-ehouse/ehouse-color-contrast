@@ -31,8 +31,6 @@ export type PaletteEntry = {
 
 export type AppState = {
   palette: PaletteEntry[];
-  isEditing: boolean;
-  lastSavedPalette: PaletteEntry[];
 };
 
 export type PaletteImportSourceKind = "upload" | "url" | "clipboard";

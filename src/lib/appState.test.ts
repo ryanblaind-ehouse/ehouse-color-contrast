@@ -21,13 +21,11 @@ function createPalette(idOffset = 0): PaletteEntry[] {
 }
 
 describe("reduceAppState", () => {
-  it("commits a replaced palette as the new saved state", () => {
+  it("replaces the palette when importing a new one", () => {
     const originalPalette = createPalette();
     const replacementPalette = createPalette(10);
     const state: AppState = {
       palette: originalPalette,
-      isEditing: true,
-      lastSavedPalette: originalPalette,
     };
 
     const nextState = reduceAppState(state, {
@@ -37,8 +35,36 @@ describe("reduceAppState", () => {
 
     expect(nextState).toEqual({
       palette: replacementPalette,
-      isEditing: false,
-      lastSavedPalette: replacementPalette,
     });
+  });
+
+  it("applies direct color changes immediately", () => {
+    const originalPalette = createPalette();
+    const state: AppState = {
+      palette: originalPalette,
+    };
+
+    const nextState = reduceAppState(state, {
+      type: "changeColorText",
+      id: 1,
+      value: "22AA44",
+    });
+
+    expect(nextState.palette[0]?.color).toBe("#22AA44");
+  });
+
+  it("applies direct name changes immediately", () => {
+    const originalPalette = createPalette();
+    const state: AppState = {
+      palette: originalPalette,
+    };
+
+    const nextState = reduceAppState(state, {
+      type: "changeName",
+      id: 1,
+      value: "Brand primary",
+    });
+
+    expect(nextState.palette[0]?.name).toBe("Brand primary");
   });
 });

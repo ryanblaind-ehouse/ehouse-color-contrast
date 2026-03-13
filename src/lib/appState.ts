@@ -9,15 +9,12 @@ import type { AppState, PaletteEntry, SerializedPalette } from "../types";
 
 export type AppAction =
   | { type: "add" }
-  | { type: "cancelEditing" }
   | { type: "changeColorText"; id: number; value: string }
   | { type: "changeName"; id: number; value: string }
-  | { type: "finishEditing" }
   | { type: "loadPalette"; palette: SerializedPalette }
   | { type: "remove"; id: number }
   | { type: "reorder"; activeId: number; overId: number }
-  | { type: "replacePalette"; palette: PaletteEntry[] }
-  | { type: "startEditing" };
+  | { type: "replacePalette"; palette: PaletteEntry[] };
 
 const FALLBACK_COLOR = "#FF0000";
 
@@ -26,8 +23,6 @@ export function createInitialAppState(serializedPalette: SerializedPalette): App
 
   return {
     palette,
-    isEditing: false,
-    lastSavedPalette: palette,
   };
 }
 
@@ -88,7 +83,6 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         palette,
-        lastSavedPalette: state.isEditing ? state.lastSavedPalette : palette,
       };
     }
 
@@ -99,7 +93,6 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         palette,
-        lastSavedPalette: state.isEditing ? state.lastSavedPalette : palette,
       };
     }
 
@@ -113,7 +106,6 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         palette,
-        lastSavedPalette: state.isEditing ? state.lastSavedPalette : palette,
       };
     }
 
@@ -122,37 +114,12 @@ export function reduceAppState(state: AppState, action: AppAction): AppState {
 
       return {
         palette,
-        isEditing: false,
-        lastSavedPalette: palette,
       };
     }
 
     case "replacePalette":
       return {
         palette: action.palette,
-        isEditing: false,
-        lastSavedPalette: action.palette,
-      };
-
-    case "startEditing":
-      return {
-        ...state,
-        isEditing: true,
-        lastSavedPalette: state.palette,
-      };
-
-    case "finishEditing":
-      return {
-        ...state,
-        isEditing: false,
-        lastSavedPalette: state.palette,
-      };
-
-    case "cancelEditing":
-      return {
-        ...state,
-        isEditing: false,
-        palette: state.lastSavedPalette,
       };
 
     default:

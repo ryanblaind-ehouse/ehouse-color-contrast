@@ -18,25 +18,41 @@ type BuildContrastMatrixSvgOptions = {
 };
 
 const ARTBOARD_BACKGROUND = "#FFFFFF";
+const CANVAS_BACKGROUND = "#FAFAFA";
 const BORDER = "#E4E4E7";
 const DASHED_BORDER = "#D4D4D8";
 const FOREGROUND = "#09090B";
 const MUTED_FOREGROUND = "#71717A";
 const MUTED_SURFACE = "#F4F4F5";
+const HEADER_SURFACE = "#FCFCFD";
 const PASS_BADGE = "#18181B";
 const PASS_BADGE_TEXT = "#FAFAFA";
 const FAIL_BADGE = "#F4F4F5";
 const FAIL_BADGE_TEXT = "#18181B";
+const PILL_SURFACE = "#F4F4F5";
+const PILL_TEXT = "#18181B";
 const FONT_FAMILY = "Inter, Inter Variable, ui-sans-serif, system-ui, sans-serif";
 
 const PAD = 32;
 const GAP = 12;
-const TITLE_HEIGHT = 54;
+const TITLE_HEIGHT = 88;
 const ROW_LABEL_WIDTH = 196;
 const HEADER_HEIGHT = 108;
 const CELL_WIDTH = 136;
 const CELL_HEIGHT = 104;
 const SURFACE_RADIUS = 16;
+const ARTBOARD_RADIUS = 28;
+
+function getPreviewTextMarkup(
+  textColor: string,
+  backgroundColor: string,
+  x: number,
+  y: number,
+) {
+  const hasStroke = areColorsIndistinguishable(textColor, backgroundColor);
+
+  return `<text class="preview-label" x="${x}" y="${y}" fill="${textColor}" ${hasStroke ? 'stroke="#18181B" stroke-width="0.9" paint-order="stroke fill"' : ""}>Aa</text>`;
+}
 
 function escapeXml(value: string) {
   return value
@@ -72,7 +88,19 @@ function line(label: string, x: number, y: number, className: string) {
   return `<text class="${className}" x="${x}" y="${y}">${escapeXml(label)}</text>`;
 }
 
-function renderPreviewSquare(
+function renderTextSwatch(
+  textColor: string,
+  x: number,
+  y: number,
+  size: number,
+) {
+  return [
+    `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="12" fill="${ARTBOARD_BACKGROUND}" stroke="${BORDER}" />`,
+    getPreviewTextMarkup(textColor, ARTBOARD_BACKGROUND, x + size / 2, y + size / 2 + 6),
+  ].join("");
+}
+
+function renderBackgroundSwatch(
   backgroundColor: string,
   textColor: string,
   x: number,
@@ -87,7 +115,21 @@ function renderPreviewSquare(
   return [
     `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="12" fill="${backgroundColor}" />`,
     border,
-    `<text class="preview-label" x="${x + size / 2}" y="${y + size / 2 + 6}" fill="${textColor}">Aa</text>`,
+    getPreviewTextMarkup(
+      textColor,
+      backgroundColor,
+      x + size / 2,
+      y + size / 2 + 6,
+    ),
+  ].join("");
+}
+
+function renderPill(label: string, x: number, y: number) {
+  const width = 24 + label.length * 7;
+
+  return [
+    `<rect x="${x}" y="${y}" width="${width}" height="28" rx="14" fill="${PILL_SURFACE}" stroke="${BORDER}" />`,
+    `<text class="pill" x="${x + width / 2}" y="${y + 18}">${escapeXml(label)}</text>`,
   ].join("");
 }
 
@@ -96,8 +138,8 @@ function renderHeaderCard(entry: PaletteEntry, x: number, y: number) {
     entry.name.toUpperCase() === entry.color.toUpperCase() ? null : entry.color.toUpperCase();
 
   return [
-    `<rect class="surface" x="${x}" y="${y}" width="${CELL_WIDTH}" height="${HEADER_HEIGHT}" rx="${SURFACE_RADIUS}" />`,
-    renderPreviewSquare(entry.color, FOREGROUND, x + 16, y + 16, 44),
+    `<rect x="${x}" y="${y}" width="${CELL_WIDTH}" height="${HEADER_HEIGHT}" rx="${SURFACE_RADIUS}" fill="${HEADER_SURFACE}" stroke="${BORDER}" />`,
+    renderTextSwatch(entry.color, x + 16, y + 16, 44),
     line(truncateLabel(entry.name), x + 16, y + 78, "label"),
     secondaryLine ? line(secondaryLine, x + 16, y + 96, "muted-label") : "",
   ].join("");
@@ -109,7 +151,7 @@ function renderRowLabel(entry: PaletteEntry, x: number, y: number) {
 
   return [
     `<rect class="surface" x="${x}" y="${y}" width="${ROW_LABEL_WIDTH}" height="${CELL_HEIGHT}" rx="${SURFACE_RADIUS}" />`,
-    renderPreviewSquare(entry.color, FOREGROUND, x + 16, y + 16, 44),
+    renderBackgroundSwatch(entry.color, FOREGROUND, x + 16, y + 16, 44),
     line(truncateLabel(entry.name), x + 74, y + 44, "label"),
     secondaryLine ? line(secondaryLine, x + 74, y + 64, "muted-label") : "",
   ].join("");
@@ -133,7 +175,7 @@ function renderMatrixCell(
 
   return [
     `<rect x="${x}" y="${y}" width="${CELL_WIDTH}" height="${CELL_HEIGHT}" rx="${SURFACE_RADIUS}" fill="${isPassing ? ARTBOARD_BACKGROUND : MUTED_SURFACE}" stroke="${isPassing ? BORDER : DASHED_BORDER}" ${isPassing ? "" : 'stroke-dasharray="5 4"'} />`,
-    renderPreviewSquare(background.color, foreground.color, x + 16, y + 16, 42),
+    renderBackgroundSwatch(background.color, foreground.color, x + 16, y + 16, 42),
     `<rect x="${x + 68}" y="${y + 16}" width="52" height="24" rx="12" fill="${isPassing ? PASS_BADGE : FAIL_BADGE}" />`,
     `<text class="score" x="${x + 94}" y="${y + 33}" fill="${isPassing ? PASS_BADGE_TEXT : FAIL_BADGE_TEXT}">${escapeXml(assessment.scoreText)}</text>`,
     line(truncateLabel(foreground.name, 18), x + 16, y + 78, "label"),
@@ -149,6 +191,8 @@ export function buildContrastMatrixSvg({
 }: BuildContrastMatrixSvgOptions): MatrixSvgArtifact {
   const title = "Contrast matrix";
   const summary = buildSummary(standardId, apcaTypography);
+  const pairingsLabel = `${palette.length * palette.length} pairings`;
+  const standardLabel = getContrastStandard(standardId).label;
   const width =
     PAD * 2 + ROW_LABEL_WIDTH + GAP + palette.length * CELL_WIDTH + Math.max(0, palette.length - 1) * GAP;
   const height =
@@ -161,6 +205,13 @@ export function buildContrastMatrixSvg({
   const matrixLeft = PAD + ROW_LABEL_WIDTH + GAP;
   const matrixTop = PAD + TITLE_HEIGHT + HEADER_HEIGHT + GAP;
   const headerTop = PAD + TITLE_HEIGHT;
+  const titleBaseline = PAD + 18;
+  const summaryBaseline = PAD + 42;
+  const axisBaseline = PAD + 72;
+  const pairingsPillWidth = 24 + pairingsLabel.length * 7;
+  const standardPillWidth = 24 + standardLabel.length * 7;
+  const pairingsPillX = width - PAD - pairingsPillWidth;
+  const standardPillX = pairingsPillX - 8 - standardPillWidth;
 
   const markup = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">`,
@@ -169,14 +220,21 @@ export function buildContrastMatrixSvg({
     `.surface { fill: ${ARTBOARD_BACKGROUND}; stroke: ${BORDER}; }`,
     `.title { font-size: 24px; font-weight: 600; fill: ${FOREGROUND}; }`,
     `.summary { font-size: 14px; font-weight: 500; fill: ${MUTED_FOREGROUND}; }`,
+    `.axis-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; fill: ${MUTED_FOREGROUND}; }`,
     `.label { font-size: 13px; font-weight: 600; fill: ${FOREGROUND}; }`,
     `.muted-label { font-size: 12px; font-weight: 500; fill: ${MUTED_FOREGROUND}; }`,
     `.preview-label { font-size: 18px; font-weight: 700; text-anchor: middle; }`,
     `.score { font-size: 11px; font-weight: 700; text-anchor: middle; }`,
+    `.pill { font-size: 12px; font-weight: 600; text-anchor: middle; fill: ${PILL_TEXT}; }`,
     "</style>",
-    `<rect width="${width}" height="${height}" rx="24" fill="${ARTBOARD_BACKGROUND}" />`,
-    `<text class="title" x="${PAD}" y="${PAD + 18}">${escapeXml(title)}</text>`,
-    `<text class="summary" x="${PAD}" y="${PAD + 42}">${escapeXml(summary)}</text>`,
+    `<rect width="${width}" height="${height}" rx="${ARTBOARD_RADIUS}" fill="${CANVAS_BACKGROUND}" />`,
+    `<rect x="12" y="12" width="${width - 24}" height="${height - 24}" rx="24" fill="${ARTBOARD_BACKGROUND}" stroke="${BORDER}" />`,
+    `<text class="title" x="${PAD}" y="${titleBaseline}">${escapeXml(title)}</text>`,
+    `<text class="summary" x="${PAD}" y="${summaryBaseline}">${escapeXml(summary)}</text>`,
+    line("Background", PAD, axisBaseline, "axis-label"),
+    line("Foreground", matrixLeft, axisBaseline, "axis-label"),
+    renderPill(standardLabel, standardPillX, PAD),
+    renderPill(pairingsLabel, pairingsPillX, PAD),
     palette
       .map((entry, index) =>
         renderHeaderCard(entry, matrixLeft + index * (CELL_WIDTH + GAP), headerTop),
